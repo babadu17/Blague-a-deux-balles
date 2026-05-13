@@ -21,7 +21,7 @@ async function chargerImages() {
           <img src="./image/${fichier}" alt="blague">
         </div>
         <div class="side-actions">
-          <div class="action-btn" onclick="partager()">
+          <div class="action-btn" onclick="partager('./image/${fichier}')">
             <div class="icon">↗️</div>
             <span>Partager</span>
           </div>
