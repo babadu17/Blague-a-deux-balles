@@ -1,18 +1,15 @@
 let toutesLesImages = [];
 let imagesVues = [];
 let imagesRestantes = [];
+const feed = document.getElementById("feed");
 
 async function chargerImages() {
   const response = await fetch("./image/registre.json");
   toutesLesImages = await response.json();
 
-  // Récupère les images déjà vues depuis le localStorage
   imagesVues = JSON.parse(localStorage.getItem("imagesVues") || "[]");
-
-  // Les restantes = celles pas encore vues
   imagesRestantes = toutesLesImages.filter(f => !imagesVues.includes(f));
 
-  // Si toutes vues, on repart de zéro
   if (imagesRestantes.length === 0) {
     imagesVues = [];
     imagesRestantes = [...toutesLesImages];
@@ -20,17 +17,10 @@ async function chargerImages() {
   }
 
   melangerTableau(imagesRestantes);
-
-  // Charge les 3 premières cartes pour démarrer
   ajouterCartes(3);
-
-  // Observe la dernière carte pour en ajouter à la volée
-  observerDerniereCarte();
 }
 
 function ajouterCartes(n) {
-  const feed = document.getElementById("feed");
-
   for (let i = 0; i < n; i++) {
     const fichier = piocherImage();
     if (!fichier) break;
@@ -59,7 +49,6 @@ function ajouterCartes(n) {
 }
 
 function piocherImage() {
-  // Plus rien à piocher : on recharge tout
   if (imagesRestantes.length === 0) {
     imagesVues = [];
     imagesRestantes = [...toutesLesImages];
@@ -67,23 +56,18 @@ function piocherImage() {
     localStorage.setItem("imagesVues", JSON.stringify(imagesVues));
   }
 
-  // Prend la première image de la liste mélangée
   const fichier = imagesRestantes.shift();
-
-  // Marque comme vue
   imagesVues.push(fichier);
   localStorage.setItem("imagesVues", JSON.stringify(imagesVues));
-
   return fichier;
 }
 
-// Observe la dernière carte : quand elle est visible, charge la suivante
 let observer = null;
 
 function observerDerniereCarte() {
   if (observer) observer.disconnect();
 
-  const cards = document.querySelectorAll(".card");
+  const cards = feed.querySelectorAll(".card");
   const derniere = cards[cards.length - 1];
   if (!derniere) return;
 
@@ -91,7 +75,10 @@ function observerDerniereCarte() {
     if (entries[0].isIntersecting) {
       ajouterCartes(1);
     }
-  }, { threshold: 0.5 });
+  }, {
+    root: feed,      // observe dans le feed, pas dans window
+    threshold: 0.5
+  });
 
   observer.observe(derniere);
 }
